@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+  <title>Bootstrap 101 Template</title>
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- HTML5 shim 和 Respond.js 是为了让 IE8 支持 HTML5 元素和媒体查询（media queries）功能 -->
+  <!-- 警告：通过 file:// 协议（就是直接将 html 页面拖拽到浏览器中）访问页面时 Respond.js 不起作用 -->
+  <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <!--jquery-->
+        <script src="https://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+  <!--vue.js-->
+  <script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+  <![endif]-->
+</head>
+<body>
+
+<div class="jumbotron">
+  <div class="container">
+    <h1>Hello, world!</h1>
+    <p><a class="btn btn-primary btn-lg" href="#" role="button">about me</a></p>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-2"></div>
+  <div class="col-md-8" id="app">
+
+    <div class="col-md-12">
+      {% verbatim %}
+      <h3 v-if="isSubdomain" style="float: left">您当前子域名为: {{ subdomainName }} </h3>
+      {% endverbatim %}
+      <h3 v-else style="float: left">您当前未申请子域名</h3>
+      <button v-on:click="getSubdomian" style="float: right; margin-top: 15px;" class="btn btn-primary" type="submit">申请域名</button>
+    </div>
+
+
+
+
+    <div class="col-md-12" style="margin-top: 10px;">
+      {% verbatim %}
+      <div v-for="item in allApi" style="margin-bottom: 30px;">
+        <h4 style="float: left">域名 {{ item.url }}</h4>
+        <textarea style="margin-bottom: 10px;" class="form-control" rows="5">{{ item.data }}</textarea>
+        <button style="float: right;background-color: pink" type="button" class="btn btn-default btn-sm">删除</button>
+      </div>
+      {% endverbatim %}
+    </div>
+
+
+
+    <div class="col-md-12">
+      <form>
+        <div class="form-group">
+          <label for="exampleInputEmail1">请求方式</label>
+          <select v-model="method" class="form-control" style="width: 120px;">
+            <option value="1">GET</option>
+            <option value="2">POST</option>
+            <option value="3">PUT</option>
+            <option value="4">DELETE</option>
+          </select>
+        </div>
+      {% verbatim %}
+        <div class="form-group">
+          <label for="subdomain">子域名</label>
+          <input type="text" class="form-control" id="subdomain" v-model="subdomainName"  disabled style="width: 360px;">
+        </div>
+      {% endverbatim %}
+        <div class="form-group">
+          <label for="url">自定义URL</label>
+          <input v-model="url" type="text" class="form-control" id="url">
+        </div>
+
+        <div class="form-group">
+          <label for="data">返回json数据</label>
+          <textarea v-model="jsonData" class="form-control" rows="12" id="data"></textarea>
+        </div>
+
+        <button v-on:click="postApi" style="float: right" type="button" class="btn btn-default">提交</button>
+      </form>
+    </div>
+    <div class="col-md-2"></div>
+  </div>
+
+
+  <!-- jQuery (Bootstrap 的所有 JavaScript 插件都依赖 jQuery，所以必须放在前边) -->
+  <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+  <!-- 加载 Bootstrap 的所有 JavaScript 插件。你也可以根据需要只加载单个插件。 -->
+  <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script>
+
+
+    var app5 = new Vue({
+      el: '#app',
+      data: {
+        subdomainName: '',
+        isSubdomain: false,
+        url: '',
+        jsonData: '',
+        method:1,
+        allApi: []
+      },
+      methods: {
+
+       getSubdomian: function () {
+         console.log('获取子域名');
+         axios.post('/interface/subdomain').then(
+            (response) => {
+             console.log('获取成功');
+             this.isSubdomain = true;
+             var data = response.data;
+             this.subdomainName = data.data.subdomain
+             console.log(this.isSubdomain)
+             console.log(this.subdomainName)
+             console.log('绑定成功')
+           }
+         )
+         .catch(
+         )
+
+       },
+        getAllapi: function(subdomainName){
+         console.log('get api')
+         axios.get('/interface/interface?subdomain=' + subdomainName).then(
+           (response) => {
+             var data = response.data;
+             if(data.status == 200){
+               this.allApi = data.data
+               console.this.allApi
+             }else{
+               alert(data.msg)
+             }
+         }
+         )
+
+        },
+
+        postApi: function(){
+         console.log('添加数据');
+         postData = {
+           method: this.method,
+           subdomain: this.subdomainName,
+           name: this.url,
+           data: this.jsonData
+         }
+         axios.post('/interface/interface', postData).then(
+           (response) => {
+             console.log('添加数据成功')
+              var data = response.data;
+             if(data.status == 200){
+               this.getAllapi(this.subdomainName)
+             }else{
+               alert(data.msg)
+             }
+         }
+         )
+        },
+      }
+
+    })
+
+
+  </script>
+</div>
+</body>
+</html>
