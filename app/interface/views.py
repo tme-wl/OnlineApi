@@ -8,6 +8,13 @@ from django.http import HttpResponse
 from interface.models import InterView, HostName
 from django.conf import settings
 
+METHOD = {
+    1: "GET",
+    2: "POST",
+    3: "PUT",
+    4: "DELETE"
+}
+
 
 def is_json(myjson):
     try:
@@ -64,12 +71,6 @@ def subdomain(request):
 
 def interface(request):
     if request.method == 'GET':
-        METHOD = {
-            1: "GET",
-            2: "POST",
-            3: "PUT",
-            4: "DELETE"
-        }
         # 获取当前接口
         subdomain = request.GET.get('subdomain', '')
         if not subdomain:
@@ -89,7 +90,7 @@ def interface(request):
         for obj in objs:
             data.append({
                 "id": obj.id,
-                "url": METHOD[obj.method] + ": http://" + settings.WEBDOMAIN + "/" + subdomain + '/' + obj.name,
+                "url": METHOD[obj.method] + ": http://" + settings.WEBDOMAIN + "/" + subdomain  + obj.name,
                 "data": obj.data
             })
         return Response({
@@ -108,6 +109,8 @@ def interface(request):
         method = request_data.get('method', 0)
         subdomain = request_data.get('subdomain', '')
         name = request_data.get('name', '')
+        if not name.startswith("/"):
+            name = '/' + name
         if not data or not method or not subdomain or not name:
             return Response({
                 "msg": "传入参数错误",
@@ -118,6 +121,13 @@ def interface(request):
         except HostName.DoesNotExist:
             return Response({
                 "msg": "子域名传入错误",
+                "status": 500
+            })
+
+        objs = InterView.objects.filter(method=method, name=name, hostname=subdomain_instance)
+        if objs:
+            return Response({
+                "msg": "url重复",
                 "status": 500
             })
         try:
@@ -153,9 +163,42 @@ def interface(request):
             "status": 200
         })
 
-def api(request, pk):
-    {
-        "a": 1,
-        "b": 2
-    }
-    return HttpResponse("Hello, world. You're at the polls index.")
+
+def myapi(request):
+    # 不分请求 所有的请求都处理
+    method = request.method
+    path = request.path
+    paths = path.split('/')
+    if len(paths) < 3:
+        return Response({
+            "msg": "获取数据错误，没有此接口记录",
+            "status": 500
+        })
+    hostname = paths[1]
+    name = "/" + "/".join(paths[2:])
+    try:
+        host = HostName.objects.get(name=hostname)
+    except HostName.DoesNotExist:
+        return Response({
+            "msg": "没有此域名",
+            "status": 500
+        })
+    method_value = 0
+    for m in METHOD:
+        if METHOD[m] == method:
+            method_value = m
+    if method_value == 0:
+        return Response({
+            "msg": "方法请求错误, 暂不支持此访问方法",
+            "status": 500
+        })
+    objs = InterView.objects.filter(hostname=host, method=method_value, name=name)
+    if objs:
+        obj = objs.last()
+        data = obj.data
+        return Response(eval(data))
+    else:
+        Response({
+            "status": 500,
+            "msg": "未获取到数据，请检查url"
+        })

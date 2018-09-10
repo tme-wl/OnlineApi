@@ -27,9 +27,10 @@
 <div class="jumbotron">
   <div class="container">
     <h1>Hello, world!</h1>
-    <p><a class="btn btn-primary btn-lg" href="#" role="button">about me</a></p>
+    <p><a class="btn btn-primary btn-lg" href="#" role="button">About Us</a></p>
   </div>
 </div>
+
 <div class="row">
   <div class="col-md-2"></div>
   <div class="col-md-8" id="app">
@@ -40,6 +41,7 @@
       {% endverbatim %}
       <h3 v-else style="float: left">您当前未申请子域名</h3>
       <button v-on:click="getSubdomian" style="float: right; margin-top: 15px;" class="btn btn-primary" type="submit">申请域名</button>
+      <input v-model="inputSubdomain" style="float: right; margin-top: 15px; margin-right: 10px; width: 120px;"  class="form-control" type="text">
     </div>
 
 
@@ -50,7 +52,7 @@
       <div v-for="item in allApi" style="margin-bottom: 30px;">
         <h4 style="float: left">域名 {{ item.url }}</h4>
         <textarea style="margin-bottom: 10px;" class="form-control" rows="5">{{ item.data }}</textarea>
-        <button style="float: right;background-color: pink" type="button" class="btn btn-default btn-sm">删除</button>
+<!--        <button style="float: right;background-color: pink;" type="button" class="btn btn-default btn-sm">删除</button>-->
       </div>
       {% endverbatim %}
     </div>
@@ -106,13 +108,14 @@
         url: '',
         jsonData: '',
         method:1,
-        allApi: []
+        allApi: [],
+        inputSubdomain: '',
       },
       methods: {
 
        getSubdomian: function () {
          console.log('获取子域名');
-         axios.post('/interface/subdomain').then(
+         axios.post('/interface/subdomain', {"subdomain": this.inputSubdomain}).then(
             (response) => {
              console.log('获取成功');
              this.isSubdomain = true;
@@ -169,6 +172,16 @@
 
 
   </script>
+</div>
+
+<h5 class="page-header"></h5>
+
+<div class="jumbotron" style="background-color: #fff">
+  <div class="container">
+    <h2>About Us:</h2>
+    <h3 style="text-align:right ">kingof69@qq.com</h3>
+    <h3 style="text-align:right"><a href="https://github.com/tme-wl/OnlineApi">https://github.com/tme-wl/OnlineApi</a></h3>
+  </div>
 </div>
 </body>
 </html>

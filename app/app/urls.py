@@ -15,9 +15,12 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from interface import views
 
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^interface/', include('interface.urls'))
+    url(r'^interface/', include('interface.urls')),
+    # 请求接口
+    url(r'^', views.myapi),
 ]

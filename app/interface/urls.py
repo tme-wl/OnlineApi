@@ -10,6 +10,4 @@ urlpatterns = [
     # 添加/获取/删除 接口数据
     url(r'^interface$', views.interface),
 
-    # 请求接口
-    url(r'^', views.api),
 ]
