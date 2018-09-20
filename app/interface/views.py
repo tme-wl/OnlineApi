@@ -39,7 +39,6 @@ def home(request):
 def subdomain(request):
     if request.method == 'POST':
         # 申请子域名
-        print(request.body, 'request.body')
         if request.body:
             data = json.loads(request.body)
         else:
